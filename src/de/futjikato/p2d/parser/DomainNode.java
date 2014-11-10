@@ -8,7 +8,7 @@ public class DomainNode extends TreeItem<String> {
         PAGE,
         ATOM,
         MOLECULE,
-        ORGANSIM
+        ORGANISM
     }
 
     private AtomicType type;
@@ -52,5 +52,9 @@ public class DomainNode extends TreeItem<String> {
 
     public void setType(AtomicType type) {
         this.type = type;
+    }
+
+    public String getTemplatePath() {
+        return builder.getTemplatePath();
     }
 }

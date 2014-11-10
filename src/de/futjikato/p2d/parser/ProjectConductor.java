@@ -58,7 +58,7 @@ public class ProjectConductor implements Observer {
                 DomainNode node = builder.createTreeItem();
                 node.setType(DomainNode.AtomicType.PAGE);
                 targetItem.getChildren().add(node);
-                ProjectScanner scanner = new ProjectScanner(startFile, fullPath, node);
+                ProjectScanner scanner = new ProjectScanner(startFile, fullPath);
                 scanner.addObserver(this);
 
                 executorService.execute(scanner);
@@ -83,13 +83,13 @@ public class ProjectConductor implements Observer {
 
     private void handleScannerNotification(ProjectScanner scanner, ProjectScanner.ScannerNotification notification) {
         NodeBuilder builder = nodeBuilders.get(notification.getId());
+        String[] arguments = notification.getArguments();
         if(builder == null) {
             System.err.println("Critical error! " + notification.getId() + " has no node builder?!");
             return;
         }
         switch(notification.getName()) {
             case IMPORT:
-                String[] arguments = notification.getArguments();
                 if(arguments.length == 1 && arguments[0] != null) {
                     try {
                         mutex.acquire();
@@ -101,7 +101,7 @@ public class ProjectConductor implements Observer {
                                 DomainNode node = newBuilder.createTreeItem();
                                 builder.addChild(node);
 
-                                ProjectScanner newScanner = new ProjectScanner(arguments[0], fullPath, node);
+                                ProjectScanner newScanner = new ProjectScanner(arguments[0], fullPath);
                                 newScanner.addObserver(this);
                                 executorService.execute(newScanner);
 
@@ -123,6 +123,9 @@ public class ProjectConductor implements Observer {
                 break;
 
             case END:
+                if(arguments.length == 1 && arguments[0] != null) {
+                    builder.setTemplatePath(arguments[0]);
+                }
                 if(--running == 0) {
                     executorService.shutdown();
                     if(onLoadingCompleteCallback != null) {

@@ -9,12 +9,6 @@ import java.util.Observable;
 
 public class ProjectScanner extends Observable implements Runnable {
 
-    private DomainNode node;
-
-    public DomainNode getNode() {
-        return node;
-    }
-
     public enum ScannerNotificationName {
         IMPORT,
         END
@@ -51,10 +45,9 @@ public class ProjectScanner extends Observable implements Runnable {
 
     private String id;
 
-    public ProjectScanner(String id, String templateFile, DomainNode node) {
+    public ProjectScanner(String id, String templateFile) {
         this.templateFilePath = templateFile;
         this.id = id;
-        this.node = node;
     }
 
     @Override
@@ -64,6 +57,7 @@ public class ProjectScanner extends Observable implements Runnable {
             mf.compile(new FileReader(templateFilePath), id);
 
             ScannerNotification notification = new ScannerNotification(id, ScannerNotificationName.END);
+            notification.setArguments(new String[] {templateFilePath});
             setChanged();
             notifyObservers(notification);
         } catch (FileNotFoundException e) {

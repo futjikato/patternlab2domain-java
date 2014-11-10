@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.web.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+
+<TitledPane animated="false" collapsible="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="800.0" text="Domain model creator" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.futjikato.p2d.detail.htmlview.HtmlViewController">
+   <content>
+
+   </content>
+   <content>
+      <SplitPane dividerPositions="0.25" prefHeight="200.0" prefWidth="200.0">
+         <items>
+            <ListView prefHeight="200.0" prefWidth="200.0" />
+            <VBox fx:id="contentBox" prefHeight="200.0" prefWidth="100.0" />
+         </items>
+      </SplitPane>
+   </content>
+</TitledPane>

@@ -19,6 +19,8 @@ public class NodeBuilder {
 
     private String id;
 
+    private String templatePath;
+
     private DomainNode.AtomicType type;
 
     public NodeBuilder(String id) {
@@ -31,7 +33,7 @@ public class NodeBuilder {
             if (id.substring(0, ATOM_PREFIX.length()).equals(ATOM_PREFIX)) {
                 type = DomainNode.AtomicType.ATOM;
             } else if (id.substring(0, ORGANISM_PREFIX.length()).equals(ORGANISM_PREFIX)) {
-                type = DomainNode.AtomicType.ORGANSIM;
+                type = DomainNode.AtomicType.ORGANISM;
             } else if (id.substring(0, MOLECULE_PREFIX.length()).equals(MOLECULE_PREFIX)) {
                 type = DomainNode.AtomicType.MOLECULE;
             }
@@ -61,5 +63,13 @@ public class NodeBuilder {
 
     public void setInformation(String info, Object value) {
         information.put(info, value);
+    }
+
+    public void setTemplatePath(String templatePath) {
+        this.templatePath = templatePath;
+    }
+
+    public String getTemplatePath() {
+        return templatePath;
     }
 }
