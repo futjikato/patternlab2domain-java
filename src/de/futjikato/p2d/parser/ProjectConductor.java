@@ -60,6 +60,7 @@ public class ProjectConductor implements Observer {
 
                 NodeBuilder builder = new NodeBuilder(startFile);
                 nodeBuilders.put(startFile, builder);
+                builder.getTreeItem().setType(DomainNode.AtomicType.PAGE);
                 targetItem.getChildren().add(builder.getTreeItem());
                 ProjectScanner scanner = new ProjectScanner(startFile, fullPath);
                 scanner.addObserver(this);

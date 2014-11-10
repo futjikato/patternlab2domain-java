@@ -61,8 +61,19 @@ public class DetailController implements Initializable {
                 TreeItem<String> item = targetTree.getSelectionModel().getSelectedItem();
                 if(item instanceof DomainNode) {
                     DomainNode node = (DomainNode) item;
-                    isModelNode.setSelected(node.isModelNode());
-                    modelId.setText(node.getModelId());
+                    if(node.getType().equals(DomainNode.AtomicType.PAGE)) {
+                        isModelNode.setSelected(false);
+                        isModelNode.setDisable(true);
+
+                        modelId.setText("");
+                        modelId.setDisable(true);
+                    } else {
+                        isModelNode.setSelected(node.isModelNode());
+                        isModelNode.setDisable(false);
+
+                        modelId.setText(node.getModelId());
+                        modelId.setDisable(false);
+                    }
                 }
             }
         });
