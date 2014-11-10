@@ -13,28 +13,37 @@ public class DomainNode extends TreeItem<String> {
 
     private AtomicType type;
 
-    private String modelId = "";
+    private NodeBuilder builder;
 
-    private boolean isModelNode = true;
-
-    public DomainNode(String s) {
+    public DomainNode(String s, NodeBuilder nodeBuilder) {
         super(s);
+        this.builder = nodeBuilder;
     }
 
     public String getModelId() {
-        return modelId;
+        Object obj = builder.getInformation("model-id");
+        if(obj != null && obj instanceof String) {
+            return (String) obj;
+        }
+
+        return getValue();
     }
 
     public void setModelId(String modelId) {
-        this.modelId = modelId;
+        builder.setInformation("model-id", modelId);
     }
 
     public boolean isModelNode() {
-        return isModelNode;
+        Object obj = builder.getInformation("is-model-node");
+        if(obj != null && obj instanceof Boolean) {
+            return (Boolean)obj;
+        }
+
+        return true;
     }
 
     public void setModelNode(boolean isModelNode) {
-        this.isModelNode = isModelNode;
+        builder.setInformation("is-model-node", isModelNode);
     }
 
     public AtomicType getType() {

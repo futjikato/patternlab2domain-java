@@ -1,7 +1,9 @@
 package de.futjikato.p2d.parser;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class NodeBuilder {
 
@@ -9,39 +11,55 @@ public class NodeBuilder {
     public static final String ORGANISM_PREFIX = "organisms-";
     public static final String MOLECULE_PREFIX = "molecules-";
 
-    private DomainNode treeItem;
+    private List<DomainNode> nodes;
 
-    private List<NodeBuilder> parents;
+    private List<DomainNode> children;
 
-    public NodeBuilder(String id, NodeBuilder parent) {
-        this.treeItem = new DomainNode(id);
-        this.parents = new LinkedList<NodeBuilder>();
+    private Map<String, Object> information;
 
-        if(parent != null) {
-            addParent(parent);
-        }
+    private String id;
+
+    private DomainNode.AtomicType type;
+
+    public NodeBuilder(String id) {
+        this.id = id;
+        this.nodes = new LinkedList<DomainNode>();
+        this.children = new LinkedList<DomainNode>();
+        this.information = new HashMap<String, Object>();
 
         if(id != null) {
             if (id.substring(0, ATOM_PREFIX.length()).equals(ATOM_PREFIX)) {
-                treeItem.setType(DomainNode.AtomicType.ATOM);
+                type = DomainNode.AtomicType.ATOM;
             } else if (id.substring(0, ORGANISM_PREFIX.length()).equals(ORGANISM_PREFIX)) {
-                treeItem.setType(DomainNode.AtomicType.ORGANSIM);
+                type = DomainNode.AtomicType.ORGANSIM;
             } else if (id.substring(0, MOLECULE_PREFIX.length()).equals(MOLECULE_PREFIX)) {
-                treeItem.setType(DomainNode.AtomicType.MOLECULE);
+                type = DomainNode.AtomicType.MOLECULE;
             }
         }
     }
 
-    public NodeBuilder(String id) {
-        this(id, null);
-    }
-
-    public DomainNode getTreeItem() {
+    public DomainNode createTreeItem() {
+        DomainNode treeItem = new DomainNode(id, this);
+        treeItem.setType(type);
+        nodes.add(treeItem);
         return treeItem;
     }
 
-    public void addParent(NodeBuilder parent) {
-        parents.add(parent);
-        parent.getTreeItem().getChildren().add(getTreeItem());
+    public void finalizeBuilder() {
+        for(DomainNode node : nodes) {
+            node.getChildren().addAll(children);
+        }
+    }
+
+    public void addChild(DomainNode node) {
+        children.add(node);
+    }
+
+    public Object getInformation(String info) {
+        return information.get(info);
+    }
+
+    public void setInformation(String info, Object value) {
+        information.put(info, value);
     }
 }

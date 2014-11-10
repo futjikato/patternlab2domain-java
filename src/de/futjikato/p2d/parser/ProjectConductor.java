@@ -19,15 +19,11 @@ public class ProjectConductor implements Observer {
 
     private Map<String, NodeBuilder> nodeBuilders;
 
-    private List<NodeBuilder> finishedNodeList;
-
-    private File pagesDir;
-
-    private File resourceRoot;
-
     private Semaphore mutex;
 
     private PatternlabPathResolver pathResolver;
+
+    private int running = 0;
 
     public void onLoadingComplete(Runnable callback) {
         onLoadingCompleteCallback = callback;
@@ -37,11 +33,10 @@ public class ProjectConductor implements Observer {
     public void runProject(ProjectEntity project) {
         targetItem = new TargetItem("root");
         nodeBuilders = new ConcurrentHashMap<String, NodeBuilder>();
-        finishedNodeList = new ArrayList<NodeBuilder>();
         mutex = new Semaphore(1);
 
-        resourceRoot = new File(project.getResourceRoot());
-        pagesDir = new File(project.getPagesSubDir());
+        File resourceRoot = new File(project.getResourceRoot());
+        File pagesDir = new File(project.getPagesSubDir());
 
         pathResolver = new PatternlabPathResolver();
         pathResolver.setResourceRoot(resourceRoot);
@@ -60,12 +55,15 @@ public class ProjectConductor implements Observer {
 
                 NodeBuilder builder = new NodeBuilder(startFile);
                 nodeBuilders.put(startFile, builder);
-                builder.getTreeItem().setType(DomainNode.AtomicType.PAGE);
-                targetItem.getChildren().add(builder.getTreeItem());
-                ProjectScanner scanner = new ProjectScanner(startFile, fullPath);
+                DomainNode node = builder.createTreeItem();
+                node.setType(DomainNode.AtomicType.PAGE);
+                targetItem.getChildren().add(node);
+                ProjectScanner scanner = new ProjectScanner(startFile, fullPath, node);
                 scanner.addObserver(this);
 
                 executorService.execute(scanner);
+
+                running++;
             }
         }
     }
@@ -96,19 +94,25 @@ public class ProjectConductor implements Observer {
                     try {
                         mutex.acquire();
                         if (!nodeBuilders.containsKey(arguments[0])) {
-                            NodeBuilder newBuilder = new NodeBuilder(arguments[0], builder);
+                            NodeBuilder newBuilder = new NodeBuilder(arguments[0]);
                             nodeBuilders.put(arguments[0], newBuilder);
                             String fullPath = pathResolver.resolve(arguments[0]);
                             if (fullPath != null) {
-                                ProjectScanner newScanner = new ProjectScanner(arguments[0], fullPath);
+                                DomainNode node = newBuilder.createTreeItem();
+                                builder.addChild(node);
+
+                                ProjectScanner newScanner = new ProjectScanner(arguments[0], fullPath, node);
                                 newScanner.addObserver(this);
                                 executorService.execute(newScanner);
+
+                                running++;
                             } else {
                                 System.err.println("Unable to fetch file for " + arguments[0]);
                             }
                         } else {
                             NodeBuilder newBuilder = nodeBuilders.get(arguments[0]);
-                            newBuilder.addParent(builder);
+                            DomainNode node = newBuilder.createTreeItem();
+                            builder.addChild(node);
                         }
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -119,25 +123,22 @@ public class ProjectConductor implements Observer {
                 break;
 
             case END:
-                try {
-                    mutex.acquire();
-                    nodeBuilders.remove(notification.getId());
-                    finishedNodeList.add(builder);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } finally {
-                    mutex.release();
-                }
-
-                if(nodeBuilders.size() == 0) {
+                if(--running == 0) {
                     executorService.shutdown();
                     if(onLoadingCompleteCallback != null) {
+                        finalizeBuilders();
                         onLoadingCompleteCallback.run();
                     } else {
                         System.err.println("No finish callback in conductor ?!");
                     }
                 }
                 break;
+        }
+    }
+
+    private void finalizeBuilders() {
+        for(NodeBuilder builder : nodeBuilders.values()) {
+            builder.finalizeBuilder();
         }
     }
 }
