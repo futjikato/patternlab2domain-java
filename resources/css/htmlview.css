@@ -1,0 +1,11 @@
+.row-container {
+    -fx-background-color: #DEDEDE;
+}
+
+.line-number {
+    -fx-padding: 1px 8px 1px 3px;
+}
+
+.line-separator {
+    -fx-padding: 0px 8px 0px 0px;
+}

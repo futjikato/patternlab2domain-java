@@ -109,9 +109,12 @@ public class DetailController implements Initializable {
                 if (controller != null) {
                     controller.injectTemplate(node.getTemplatePath());
 
+                    Scene scene = new Scene(root, 600, 400);
+                    scene.getStylesheets().add("css/htmlview.css");
+
                     Stage stage = new Stage();
                     stage.setTitle("Node HTML view");
-                    stage.setScene(new Scene(root, 600, 400));
+                    stage.setScene(scene);
                     stage.show();
                 }
             } catch (IOException e) {
